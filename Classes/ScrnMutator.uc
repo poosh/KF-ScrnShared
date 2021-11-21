@@ -8,7 +8,7 @@ var transient KFGameType KF;
 
 static final function int LibVersion()
 {
-    return 96801;
+    return 96900;
 }
 
 static final function string VersionStr(int v, optional bool bClean)
@@ -145,3 +145,51 @@ function RegisterPostMortem()
     }
     Destroy();
 }
+
+// publishes Kay=Value for all ScrnMutators
+function final static bool sBroadcastValue(LevelInfo Level, name Key, int Value)
+{
+    local int count;
+    local ScrnMutator SM;
+
+    for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
+        if ( SM.SetCustomValue(Key, Value) ) {
+            ++count;
+        }
+    }
+    return count > 0;
+}
+
+function final static bool sBroadcastFloat(LevelInfo Level, name Key, float Value)
+{
+    local int count;
+    local ScrnMutator SM;
+
+    for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
+        if ( SM.SetCustomFloat(Key, Value) ) {
+            ++count;
+        }
+    }
+    return count > 0;
+}
+
+function final static bool sBroadcastStr(LevelInfo Level, name Key, string Value)
+{
+    local int count;
+    local ScrnMutator SM;
+
+    for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
+        if ( SM.SetCustomStr(Key, Value) ) {
+            ++count;
+        }
+    }
+    return count > 0;
+}
+
+function bool BroadcastValue(name Key, int Value) { return sBroadcastValue(Level, Key, value); }
+function bool BroadcastFloat(name Key, float Value) { return sBroadcastFloat(Level, Key, value); }
+function bool BroadcastStr(name Key, string Value) { return sBroadcastStr(Level, Key, value); }
+
+function bool SetCustomValue(name Key, int Value) { return false; }
+function bool SetCustomFloat(name Key, float Value) { return false; }
+function bool SetCustomStr(name Key, string Value) { return false; }
