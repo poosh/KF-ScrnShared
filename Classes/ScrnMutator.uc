@@ -8,7 +8,7 @@ var transient KFGameType KF;
 
 static final function int LibVersion()
 {
-    return 96900;
+    return 96909;
 }
 
 static final function string VersionStr(int v, optional bool bClean)
@@ -147,49 +147,49 @@ function RegisterPostMortem()
 }
 
 // publishes Kay=Value for all ScrnMutators
-function final static bool sBroadcastValue(LevelInfo Level, name Key, int Value)
+function final static bool sPublishValue(LevelInfo Level, name Key, int Value, optional ScrnMutator Publisher)
 {
     local int count;
     local ScrnMutator SM;
 
     for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
-        if ( SM.SetCustomValue(Key, Value) ) {
+        if ( SM != Publisher && SM.SetCustomValue(Key, Value, Publisher) ) {
             ++count;
         }
     }
     return count > 0;
 }
 
-function final static bool sBroadcastFloat(LevelInfo Level, name Key, float Value)
+function final static bool sPublishFloat(LevelInfo Level, name Key, float Value, optional ScrnMutator Publisher)
 {
     local int count;
     local ScrnMutator SM;
 
     for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
-        if ( SM.SetCustomFloat(Key, Value) ) {
+        if ( SM != Publisher && SM.SetCustomFloat(Key, Value, Publisher) ) {
             ++count;
         }
     }
     return count > 0;
 }
 
-function final static bool sBroadcastStr(LevelInfo Level, name Key, string Value)
+function final static bool sPublishStr(LevelInfo Level, name Key, string Value, optional ScrnMutator Publisher)
 {
     local int count;
     local ScrnMutator SM;
 
     for ( SM = FirstScrnMutator(Level); SM != none; SM = SM.NextScrnMutator() ) {
-        if ( SM.SetCustomStr(Key, Value) ) {
+        if ( SM != Publisher && SM.SetCustomStr(Key, Value, Publisher) ) {
             ++count;
         }
     }
     return count > 0;
 }
 
-function bool BroadcastValue(name Key, int Value) { return sBroadcastValue(Level, Key, value); }
-function bool BroadcastFloat(name Key, float Value) { return sBroadcastFloat(Level, Key, value); }
-function bool BroadcastStr(name Key, string Value) { return sBroadcastStr(Level, Key, value); }
+function bool PublishValue(name Key, int Value) { return sPublishValue(Level, Key, value, self); }
+function bool PublishFloat(name Key, float Value) { return sPublishFloat(Level, Key, value, self); }
+function bool PublishStr(name Key, string Value) { return sPublishStr(Level, Key, value, self); }
 
-function bool SetCustomValue(name Key, int Value) { return false; }
-function bool SetCustomFloat(name Key, float Value) { return false; }
-function bool SetCustomStr(name Key, string Value) { return false; }
+function bool SetCustomValue(name Key, int Value, optional ScrnMutator Publisher) { return false; }
+function bool SetCustomFloat(name Key, float Value, optional ScrnMutator Publisher) { return false; }
+function bool SetCustomStr(name Key, string Value, optional ScrnMutator Publisher) { return false; }
