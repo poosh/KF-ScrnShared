@@ -3,12 +3,13 @@ class ScrnMutator extends Mutator
 
 // format: MMNNPP, where M - major, N - minor, P - patch
 var const int VersionNumber;
+var const int MinLibversion;
 var transient KFGameType KF;
 
 
 static final function int LibVersion()
 {
-    return 96909;
+    return 97000;
 }
 
 static final function string VersionStr(int v, optional bool bClean)
@@ -21,17 +22,6 @@ static final function string GetVersionStr(optional bool bClean)
     return VersionStr(default.VersionNumber, bClean);
 }
 
-// returns true of the mutator has the same version as the given version, patch excluding
-final function bool SameVersionAs(int v)
-{
-    return VersionNumber / 100 == v / 100;
-}
-
-function bool CheckVersion()
-{
-    return SameVersionAs(LibVersion());
-}
-
 function PostBeginPlay()
 {
     KF = KFGameType(Level.Game);
@@ -41,8 +31,13 @@ function PostBeginPlay()
         return;
     }
 
-    if (!CheckVersion()) {
-        warn("ScrN Version Mismatch: " $ self.class @ GetVersionStr() $ " <> lib " $ VersionStr(LibVersion()));
+    if (LibVersion() < MinLibversion) {
+        warn("ERROR: Deprecated ScrnShared library! " $ self.class @ GetVersionStr()
+                $ " requires lib " $ VersionStr(MinLibversion)
+                $ ". Actual lib version: " $ VersionStr(LibVersion(), true)
+                $ ". Please upgrade ScrnShared.u");
+        Destroy();
+        return;
     }
 }
 
@@ -72,6 +67,14 @@ function Mutate(string MutateString, PlayerController Sender)
     }
 
     super.Mutate(MutateString, Sender);
+}
+
+function ServerTraveling(string URL, bool bItems)
+{
+    if (NextMutator != None)
+        NextMutator.ServerTraveling(URL,bItems);
+
+    class'ScrnF'.static.ResetDebug();
 }
 
 static function ScrnMutator FindScrnMutator(Mutator StartWith)
@@ -193,3 +196,9 @@ function bool PublishStr(name Key, string Value) { return sPublishStr(Level, Key
 function bool SetCustomValue(name Key, int Value, optional ScrnMutator Publisher) { return false; }
 function bool SetCustomFloat(name Key, float Value, optional ScrnMutator Publisher) { return false; }
 function bool SetCustomStr(name Key, string Value, optional ScrnMutator Publisher) { return false; }
+
+
+defaultproperties
+{
+    MinLibversion=97000
+}
