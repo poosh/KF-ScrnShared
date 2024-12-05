@@ -3,13 +3,13 @@ class ScrnMutator extends Mutator
 
 // format: MMNNPP, where M - major, N - minor, P - patch
 var const int VersionNumber;
-var const int MinLibversion;
+var const int MinLibVersion;
 var transient KFGameType KF;
 
 
 static final function int LibVersion()
 {
-    return 97000;
+    return 97100;
 }
 
 static final function string VersionStr(int v, optional bool bClean)
@@ -31,9 +31,9 @@ function PostBeginPlay()
         return;
     }
 
-    if (LibVersion() < MinLibversion) {
+    if (LibVersion() < MinLibVersion) {
         warn("ERROR: Deprecated ScrnShared library! " $ self.class @ GetVersionStr()
-                $ " requires lib " $ VersionStr(MinLibversion)
+                $ " requires lib " $ VersionStr(MinLibVersion)
                 $ ". Actual lib version: " $ VersionStr(LibVersion(), true)
                 $ ". Please upgrade ScrnShared.u");
         Destroy();
@@ -200,5 +200,5 @@ function bool SetCustomStr(name Key, string Value, optional ScrnMutator Publishe
 
 defaultproperties
 {
-    MinLibversion=97000
+    MinLibVersion=97100
 }

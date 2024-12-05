@@ -133,7 +133,7 @@ static final function String FormatTime(int Seconds)
 // Left-pads string to a given length with "with" or spaces.
 // Makes use of native functions as much as possible for better perfomance (unless TWI screwed up C++ code too)
 // Max padding is limited to 80 characters (len(pad))
-static function string LPad(coerce string src, int to_len, optional string with)
+static final function string LPad(coerce string src, int to_len, optional string with)
 {
     local string custom_pad;
     local int pad_len;
@@ -149,7 +149,7 @@ static function string LPad(coerce string src, int to_len, optional string with)
     return left(default.pad, pad_len) $ src;
 }
 
-static function string RPad(coerce string src, int to_len, optional string with)
+static final function string RPad(coerce string src, int to_len, optional string with)
 {
     local string custom_pad;
     local int pad_len;
@@ -165,12 +165,12 @@ static function string RPad(coerce string src, int to_len, optional string with)
     return src $ left(default.pad, pad_len);
 }
 
-static function bool StartsWith(string str, string part)
+static final function bool StartsWith(string str, string part)
 {
     return left(str, len(part)) ~= part;
 }
 
-static function bool EndsWith(string str, string part)
+static final function bool EndsWith(string str, string part)
 {
     return right(str, len(part)) ~= part;
 }
@@ -206,6 +206,43 @@ static final function string VersionStr(int v, optional bool bClean) {
         s $= patch;
     }
     return s;
+}
+
+/**
+  * @return true if TestStr contains all Keywords
+  * @pre Keywords must not be empty
+  */
+static final function bool MatchKeywords(string TestStr, out array<string> Keywords) {
+    local int k;
+
+    for (k = 0; k < Keywords.Length; ++k) {
+        if (InStr(TestStr, Keywords[k]) == -1) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static final function bool SearchKeywords(out array<string> Items, out array<string> Keywords, out array<int> MatchIndexes) {
+    local int i;
+
+    MatchIndexes.Length = 0;
+    if (Items.Length == 0 || Keywords.Length == 0)
+        return false;
+
+    for (i = 0; i < Items.Length; ++i) {
+        if (MatchKeywords(items[i], Keywords)) {
+            MatchIndexes[MatchIndexes.Length] = i;
+        }
+    }
+    return MatchIndexes.Length > 0;
+}
+
+static final function bool SearchKeywordsStr(out array<string> Items, string KeywordStr, out array<int> MatchIndexes) {
+    local array<string> Keywords;
+
+    Split(KeywordStr, " ", Keywords);
+    return SearchKeywords(Items, Keywords, MatchIndexes);
 }
 
 
@@ -269,6 +306,32 @@ static final function LogArray(out array <class> AArray)
     }
 }
 
+static final function int SearchObj(out array<Object> arr, Object val)
+{
+    local int i;
+
+    if (val == none || arr.length == 0)
+        return -1;
+
+    for (i = 0; i < arr.length; ++i) {
+        if (arr[i] == val)
+            return i;
+    }
+    return -1;
+}
+
+static final function bool ObjAddUnique(out array<Object> arr, Object val)
+{
+    if (val == none)
+        return false;
+
+    if (SearchObj(arr, val) != -1)
+        return false;
+
+    arr[arr.length] = val;
+    return true;
+}
+
 // ============================================================================
 // MATH
 // ============================================================================
@@ -276,9 +339,15 @@ static final function LogArray(out array <class> AArray)
 // returns a % b.
 // The native operator % is defined only for float (wtf?), which doesn't ensure precission.
 // Use mod(a, b) only if the precission is a must-have. Otherwise, use the native operator, which performs faster.
-static function int Mod(int a, int b)
+static final function int Mod(int a, int b)
 {
     return a - a / b * b;
+}
+
+// Returns true if float is not a real number (NaN, -INF, or +INF)
+static final function bool IsNaN(float f)
+{
+    return !(f < 0 || f >= 0);
 }
 
 /**
@@ -290,7 +359,7 @@ static function int Mod(int a, int b)
  * @pre The function assumes that the sphere is inside the target's collision cylinder
  * @return true if the ray hits the sphere
  */
-static function bool TestHitboxSphere(vector HitLoc, vector Ray, vector SphereLoc, float SphereRadius)
+static final function bool TestHitboxSphere(vector HitLoc, vector Ray, vector SphereLoc, float SphereRadius)
 {
     local vector HitToSphere;  // vector from HitLoc to SphereLoc
     local vector P;
@@ -505,7 +574,6 @@ static final function string StripColor(string s)
     return s;
 }
 
-
 // returns first i amount of characters excluding escape color codes
 static final function string LeftCol(string ColoredString, int i)
 {
@@ -527,6 +595,23 @@ static final function string LeftCol(string ColoredString, int i)
     return Left(ColoredString, c);
 }
 
+
+// ============================================================================
+// I/O
+// ============================================================================
+static final function byte GetNumKeyIndex(byte Key) {
+    if (Key >= 0x60 && Key <= 0x69) {
+        // convert IK_NumPadX to IK_X
+        Key -= 0x30;
+    }
+    if (Key >= 0x30 && Key <= 0x39) {
+        // IK_0 .. IK_9
+        if (Key == 0x30)
+            return 9;
+        return Key - 0x31;
+    }
+    return 255;
+}
 
 // ============================================================================
 // DEBUG
