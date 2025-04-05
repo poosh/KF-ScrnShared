@@ -9,7 +9,7 @@ var transient KFGameType KF;
 
 static final function int LibVersion()
 {
-    return 97100;
+    return 97200;
 }
 
 static final function string VersionStr(int v, optional bool bClean)

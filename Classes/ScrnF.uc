@@ -392,6 +392,31 @@ static final function bool TestHitboxSphere(vector HitLoc, vector Ray, vector Sp
     return VSizeSquared(P - SphereLoc) < SphereRadius;
 }
 
+/**
+ * @brief Applies a Low-Pass Filter to the input samples, adding inertia to the system.
+ * @param y [in] previous/initial result of the function
+ *          [out] new result
+ * @param x new sample value
+ * @oaram dt time between the previous and the new sample
+ * @param rc time constant - the reference measurement time.
+ *  The higher rc, the more inertia (less impact of a single x on y)
+ */
+static function lpf(out float y, float x, float dt, float rc)
+{
+    local float a;
+
+    a = dt / (rc + dt);
+    y = a * x + (1 - a) * y;
+}
+
+/** Calculates the multiplier to act at real-time speed during a Zed Time.
+ *  @return the action speed multiplier.
+ */
+static function float RealTimeFactor(LevelInfo Level)
+{
+    return fmax(1.1 / Level.TimeDilation, 1.0);
+}
+
 
 // ============================================================================
 // PLAYERS & ADMINS
