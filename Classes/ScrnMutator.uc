@@ -9,7 +9,7 @@ var transient KFGameType KF;
 
 static final function int LibVersion()
 {
-    return 97200;
+    return 97300;
 }
 
 static final function string VersionStr(int v, optional bool bClean)
@@ -200,5 +200,5 @@ function bool SetCustomStr(name Key, string Value, optional ScrnMutator Publishe
 
 defaultproperties
 {
-    MinLibVersion=97100
+    MinLibVersion=97300
 }

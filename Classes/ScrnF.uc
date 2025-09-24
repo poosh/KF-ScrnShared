@@ -245,6 +245,22 @@ static final function bool SearchKeywordsStr(out array<string> Items, string Key
     return SearchKeywords(Items, Keywords, MatchIndexes);
 }
 
+static function int WordCount(String str) {
+    if (str == "") return 0;
+
+    return Len(str) - Len(Repl(Repl(str, " ", "", true), "|", "", true)) + 1;
+}
+
+static function float TextReadTime(String str) {
+    local int wc;
+
+    wc = WordCount(str);
+    if (wc == 0)
+        return 0.0;
+
+    return wc * 0.5 * fmax(1.0, float(Len(str)) / (4 * wc));
+}
+
 
 // ============================================================================
 // ARRAYS
@@ -480,6 +496,46 @@ static final function Pawn FindPawnByPRI(PlayerReplicationInfo PRI)
     }
 
     return none;
+}
+
+/**
+ * @brief Fills the player controller array with alive players.
+ *
+ * @pre Server-side only. Never called it on the client.
+ * @param Game Pass the Level property of any actor.
+ * @param Players (out) Player controller list of the alive players.
+ * @return Alive player count.
+ * @see GetAlivePlayerCount if you need only the number.
+ */
+static final function int GetAlivePlayers(GameInfo Game, out array<PlayerController> Players) {
+    local Controller C;
+    local int i;
+
+    // The below lines produces a NULL access warning if called client-side to indicate that
+    // the function must be called server-side only.
+    Players.length = Game.NumPlayers;
+    for (C = Game.Level.ControllerList; C != none; C = C.nextController) {
+        if (C.bIsPlayer && C.Pawn != none && C.Pawn.Health > 0) {
+            Players[i] = PlayerController(C);
+            if (Players[i] != none) {
+                ++i;
+            }
+        }
+    }
+    Players.length = i;
+    return i;
+}
+
+static final function int GetAlivePlayerCount(GameInfo Game) {
+    local Controller C;
+    local int i;
+
+    for (C = Game.Level.ControllerList; C != none; C = C.nextController) {
+        if (C.bIsPlayer && C.Pawn != none && C.Pawn.Health > 0 && PlayerController(C) != none) {
+            ++i;
+        }
+    }
+    return i;
 }
 
 /**
