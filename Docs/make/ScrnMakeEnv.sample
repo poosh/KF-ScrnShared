@@ -1,0 +1,70 @@
+@echo off
+
+set REVEMU=0
+set KFPACKAGE=
+call :GetKfPackage KFPACKAGE %~dpn1
+
+set KFDIR=C:\Games\kf
+set STEAMEXE=c:\Steam\steam.exe
+set STEAMDIR=C:\Steam\steamapps\common\KillingFloor
+set RELEASEDIR=C:\Games\KFOut\%KFPACKAGE%
+set BUNDLEDIR=C:\Games\KFOut\ScrnBundlePart2
+set BUNDLEUZ2=C:\Games\KFOut\ScrnBundlePartUZ2
+set WEBDIR=C:\Users\%USERNAME%\Dropbox\KFWeb
+
+if "%~2" == "/s" goto end
+
+echo -------------------------------------------------------------------------
+echo KFPACKAGE=%KFPACKAGE%
+echo KFDIR=%KFDIR%
+echo STEAMDIR=%STEAMDIR%
+echo RELEASEDIR=%RELEASEDIR%
+echo BUNDLEDIR=%BUNDLEDIR%
+echo WEBDIR=%WEBDIR%
+echo -------------------------------------------------------------------------
+
+:end
+exit /b 0
+
+:GetKfPackage
+set _param2=%~dp2
+set _param2=%_param2:~0,-1%
+call :GetParentDirName %1 %_param2%
+exit /b 0
+
+:GetParentDirName
+echo ExtractParentDir %1 %2
+set %~1=%~n2
+exit /b 0
+
+:GetVersion
+@REM Parses the first "VersionNumber=" line of file %1 and sets:
+@REM   VERSION=97452
+@REM   VERSION_MAJOR=9
+@REM   VERSION_MINOR=74
+@REM   VERSION_PATCH=52
+@REM   VERSIONSTR=v9.74.52
+@REM Parts are not zero-padded: "08" would be an invalid octal number in set /a.
+set VERSION=
+set VERSION_MAJOR=
+set VERSION_MINOR=
+set VERSION_PATCH=
+set VERSIONSTR=
+if not exist "%~1" (
+    echo GetVersion: file not found: %~1
+    exit /b 1
+)
+for /f "usebackq tokens=2 delims==	 " %%v in (`findstr /R /C:"^[ 	]*VersionNumber[ 	]*=" "%~1"`) do (
+    set VERSION=%%v
+    goto GetVersionParse
+)
+echo GetVersion: VersionNumber not found in %~1
+exit /b 1
+:GetVersionParse
+set /a VERSION_MAJOR=VERSION / 10000
+set /a VERSION_MINOR=VERSION / 100 %% 100
+set /a VERSION_PATCH=VERSION %% 100
+@REM 97405 -> 17405 -> "74" + "05"
+set /a VERSIONSTR=VERSION %% 10000 + 10000
+set VERSIONSTR=v%VERSION_MAJOR%.%VERSIONSTR:~1,2%.%VERSIONSTR:~3%
+exit /b 0

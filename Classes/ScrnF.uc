@@ -107,7 +107,7 @@ static final function String FormatTime(int Seconds)
     local int Minutes, Hours;
     local String Time;
 
-    if( Seconds > 3600 )
+    if( Seconds >= 3600 )
     {
         Hours = Seconds / 3600;
         Seconds -= Hours * 3600;
@@ -165,14 +165,24 @@ static final function string RPad(coerce string src, int to_len, optional string
     return src $ left(default.pad, pad_len);
 }
 
-static final function bool StartsWith(string str, string part)
+static final function bool StartsWith(string str, string part, optional bool bCaseSensitive)
 {
-    return left(str, len(part)) ~= part;
+    local string test_str;
+
+    test_str = left(str, len(part));
+    if (test_str == part)
+        return true;
+    return !bCaseSensitive && test_str ~= part;
 }
 
-static final function bool EndsWith(string str, string part)
+static final function bool EndsWith(string str, string part, optional bool bCaseSensitive)
 {
-    return right(str, len(part)) ~= part;
+    local string test_str;
+
+    test_str = right(str, len(part));
+    if (test_str == part)
+        return true;
+    return !bCaseSensitive && test_str ~= part;
 }
 
 // Converts version number in user-friendly string, e.g. 1.23 or 1.23.45
@@ -245,6 +255,7 @@ static final function bool SearchKeywordsStr(out array<string> Items, string Key
     return SearchKeywords(Items, Keywords, MatchIndexes);
 }
 
+// WordCount counts separators, not the actual words. Double space inflates the count.
 static function int WordCount(String str) {
     if (str == "") return 0;
 
@@ -346,6 +357,44 @@ static final function bool ObjAddUnique(out array<Object> arr, Object val)
 
     arr[arr.length] = val;
     return true;
+}
+
+/**
+ * @brief Inserts one array into another.
+ * @param dst [out] the array to insert into
+ * @param src [in] the array to copy objects from. Must not be the same array as dst.
+ *        The src is unchanged; it is marked "out" only to pass by reference.
+ * @param pos the position in dst for object insertion. Default 0 - insert objects at the beginning of dst.
+ *        Allowed range: [0, dst.Length]
+ * @param count the number of objects to insert. Default 0 - insert all src objects.
+ *        Clamped to the available number of objects.
+ * @param skip the number of objects to skip from the beginning of src. Default 0 - no skip.
+ * @return the position in dst right after the last inserted object, so that consecutive
+ *         calls can chain insertions. Returns pos unchanged if nothing was inserted.
+ */
+static final function int ObjArrayInsert(out array<Object> dst, out array<Object> src, optional int pos,
+        optional int count, optional int skip)
+{
+    local int i;
+
+    pos = Clamp(pos, 0, dst.Length);
+    if (src.Length == 0)
+        return pos;
+
+    if (skip < 0)
+        skip = 0;
+    if (count == 0 || count + skip > src.Length) {
+        count = src.Length - skip;
+    }
+
+    if (count <= 0)
+        return pos;
+
+    dst.insert(pos, count);
+    for (i = 0; i < count; ++i) {
+        dst[pos++] = src[i + skip];
+    }
+    return pos;
 }
 
 // ============================================================================
@@ -463,7 +512,6 @@ static final function bool CheckAdmin(PlayerController Sender)
 {
     if (IsAdmin(Sender))
         return true;
-
 
     Sender.ReceiveLocalizedMessage(class'ScrnMsg', class'ScrnMsg'.default.msgAdminRequired);
     return false;
@@ -605,6 +653,9 @@ static function string ParseColorTags(string ColoredText, optional PlayerReplica
     local int i;
     local string s;
 
+    if (InStr(ColoredText, "^") < 0)
+        return ColoredText;  // no color tags in the text
+
     s = ColoredText;
     for (i = 0; i < default.ColorTags.Length; ++i) {
         s = Repl(s, default.ColorTags[i].T, ColorString("",
@@ -621,6 +672,9 @@ static function string StripColorTags(string ColoredText)
 {
     local int i;
     local string s;
+
+    if (InStr(ColoredText, "^") < 0)
+        return ColoredText;  // no color tags in the text
 
     s = ColoredText;
     for (i = 0; i < default.ColorTags.Length; ++i) {
@@ -784,16 +838,16 @@ defaultproperties
 {
     pad="                                                                                "
 
-    ColorTags(00)=(T="^0",R=1,G=1,B=1)
-    ColorTags(01)=(T="^1",R=200,G=1,B=1)
-    ColorTags(02)=(T="^2",R=1,G=200,B=1)
-    ColorTags(03)=(T="^3",R=200,G=200,B=1)
-    ColorTags(04)=(T="^4",R=1,G=1,B=255)
-    ColorTags(05)=(T="^5",R=1,G=255,B=255)
-    ColorTags(06)=(T="^6",R=200,G=1,B=200)
-    ColorTags(07)=(T="^7",R=200,G=200,B=200)
-    ColorTags(08)=(T="^8",R=255,G=127,B=0)
-    ColorTags(09)=(T="^9",R=128,G=128,B=128)
+    ColorTags( 0)=(T="^0",R=1,G=1,B=1)
+    ColorTags( 1)=(T="^1",R=200,G=1,B=1)
+    ColorTags( 2)=(T="^2",R=1,G=200,B=1)
+    ColorTags( 3)=(T="^3",R=200,G=200,B=1)
+    ColorTags( 4)=(T="^4",R=1,G=1,B=255)
+    ColorTags( 5)=(T="^5",R=1,G=255,B=255)
+    ColorTags( 6)=(T="^6",R=200,G=1,B=200)
+    ColorTags( 7)=(T="^7",R=200,G=200,B=200)
+    ColorTags( 8)=(T="^8",R=255,G=127,B=0)
+    ColorTags( 9)=(T="^9",R=128,G=128,B=128)
 
     ColorTags(10)=(T="^w$",R=255,G=255,B=255)
     ColorTags(11)=(T="^r$",R=255,G=1,B=1)
