@@ -18,10 +18,9 @@ var array<SColorTag> ColorTags;
 
 //  Performs binary search on sorted array.
 //  @param arr : array of sorted items (in ascending order). Array will not be modified.
-//               out modifier is used just for performance purpose (pass by reference).
 //  @param val : value to search
 //  @return array index or -1, if value not found.
-static final function int BinarySearch(out array<int> arr, int val)
+static final function int BinarySearch(array<int> arr, int val)
 {
     local int start, end, i;
 
@@ -40,7 +39,7 @@ static final function int BinarySearch(out array<int> arr, int val)
     return -1;
 }
 
-static final function int BinarySearchStr(out array<string> arr, string val)
+static final function int BinarySearchStr(array<string> arr, string val)
 {
     local int start, end, i;
 
@@ -59,7 +58,7 @@ static final function int BinarySearchStr(out array<string> arr, string val)
     return -1;
 }
 
-static final function int SearchStr(out array<string> arr, string val)
+static final function int SearchStr(array<string> arr, string val)
 {
     local int i;
 
@@ -73,7 +72,7 @@ static final function int SearchStr(out array<string> arr, string val)
     return -1;
 }
 
-static final function int SearchStrIgnoreCase(out array<string> arr, string val)
+static final function int SearchStrIgnoreCase(array<string> arr, string val)
 {
     local int i;
 
@@ -87,7 +86,7 @@ static final function int SearchStrIgnoreCase(out array<string> arr, string val)
     return -1;
 }
 
-static final function int SearchName(out array<name> arr, name val)
+static final function int SearchName(array<name> arr, name val)
 {
     local int i;
 
@@ -222,7 +221,7 @@ static final function string VersionStr(int v, optional bool bClean) {
   * @return true if TestStr contains all Keywords
   * @pre Keywords must not be empty
   */
-static final function bool MatchKeywords(string TestStr, out array<string> Keywords) {
+static final function bool MatchKeywords(string TestStr, array<string> Keywords) {
     local int k;
 
     for (k = 0; k < Keywords.Length; ++k) {
@@ -233,7 +232,7 @@ static final function bool MatchKeywords(string TestStr, out array<string> Keywo
     return true;
 }
 
-static final function bool SearchKeywords(out array<string> Items, out array<string> Keywords, out array<int> MatchIndexes) {
+static final function bool SearchKeywords(array<string> Items, array<string> Keywords, out array<int> MatchIndexes) {
     local int i;
 
     MatchIndexes.Length = 0;
@@ -248,7 +247,7 @@ static final function bool SearchKeywords(out array<string> Items, out array<str
     return MatchIndexes.Length > 0;
 }
 
-static final function bool SearchKeywordsStr(out array<string> Items, string KeywordStr, out array<int> MatchIndexes) {
+static final function bool SearchKeywordsStr(array<string> Items, string KeywordStr, out array<int> MatchIndexes) {
     local array<string> Keywords;
 
     Split(KeywordStr, " ", Keywords);
@@ -288,7 +287,7 @@ static final function bool ClassAddToArrayUnique(out array<class> AArray, class 
 }
 
 // returns true if an array contains a given class
-static final function bool ClassIsInArray(out array<class> AArray, class AClass)
+static final function bool ClassIsInArray(array<class> AArray, class AClass)
 {
     local int i;
 
@@ -303,7 +302,7 @@ static final function bool ClassIsInArray(out array<class> AArray, class AClass)
 }
 
 //returns true if class or its parent is in a given array
-static final function bool ClassChildIsInArray(out array<class> AArray, class AClass)
+static final function bool ClassChildIsInArray(array<class> AArray, class AClass)
 {
     local int i;
 
@@ -318,7 +317,7 @@ static final function bool ClassChildIsInArray(out array<class> AArray, class AC
 }
 
 //output array to the log - for debugging
-static final function LogArray(out array <class> AArray)
+static final function LogArray(array<class> AArray)
 {
     local int i;
 
@@ -333,7 +332,7 @@ static final function LogArray(out array <class> AArray)
     }
 }
 
-static final function int SearchObj(out array<Object> arr, Object val)
+static final function int SearchObj(array<Object> arr, Object val)
 {
     local int i;
 
@@ -363,7 +362,6 @@ static final function bool ObjAddUnique(out array<Object> arr, Object val)
  * @brief Inserts one array into another.
  * @param dst [out] the array to insert into
  * @param src [in] the array to copy objects from. Must not be the same array as dst.
- *        The src is unchanged; it is marked "out" only to pass by reference.
  * @param pos the position in dst for object insertion. Default 0 - insert objects at the beginning of dst.
  *        Allowed range: [0, dst.Length]
  * @param count the number of objects to insert. Default 0 - insert all src objects.
@@ -372,7 +370,7 @@ static final function bool ObjAddUnique(out array<Object> arr, Object val)
  * @return the position in dst right after the last inserted object, so that consecutive
  *         calls can chain insertions. Returns pos unchanged if nothing was inserted.
  */
-static final function int ObjArrayInsert(out array<Object> dst, out array<Object> src, optional int pos,
+static final function int ObjArrayInsert(out array<Object> dst, array<Object> src, optional int pos,
         optional int count, optional int skip)
 {
     local int i;
